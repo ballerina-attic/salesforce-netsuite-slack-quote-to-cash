@@ -1,0 +1,11 @@
+[project]
+org-name= "chamil"
+version= "0.1.0"
+
+[build-options]
+observability-included=true
+
+[dependencies]
+"thishani/sfdc" = { 
+    path = "/home/chamil/Documents/projects/connectors/sfdc-streaming-connector/sfdc-connector/target/balo/sfdc-2020r2-java8-0.1.0.balo"
+    }
