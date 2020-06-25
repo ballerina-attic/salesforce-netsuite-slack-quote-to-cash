@@ -71,13 +71,13 @@ function updateNetSuiteCustomer(string customerId) returns @tainted error? {
     [string[], boolean]|netsuite:Error result = nsClient->search(netsuite:Customer, "entityId IS " + customerId);
     if result is netsuite:Error {
         io:println(result.message());
-        customer = check createNewCustomer(customerId, company);
+        customer = check createNewCustomer(customerId);
     } else {
         var [idArr, hasMore] = result;
 
         if (idArr.length() == 0) {
             // Create new customer record (step 6).
-            customer = check createNewCustomer(customerId, company);
+            customer = check createNewCustomer(customerId);
         } else {
             customer = check retriveExistingCustomer(<@untainted> idArr[0]);
             io:println("Existing customer is retrieved: customer id = " + idArr[0]);

@@ -1,7 +1,7 @@
 import ballerina/io;
 import ballerinax/netsuite;
 
-function createNewCustomer(string customerId, string company) returns @tainted netsuite:Customer|netsuite:Error {
+function createNewCustomer(string customerId) returns @tainted netsuite:Customer|netsuite:Error {
 
     // Get the subsidiary, which the Customer record belongs to.
     string subsidiaryId = "1"; 
@@ -14,7 +14,7 @@ function createNewCustomer(string customerId, string company) returns @tainted n
 
     netsuite:Customer customer = {
         entityId: customerId,
-        companyName: company,
+        companyName: customerId,
         subsidiary: subsidiary
     };
 
