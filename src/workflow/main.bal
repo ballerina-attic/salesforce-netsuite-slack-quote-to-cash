@@ -1,4 +1,6 @@
 import ballerina/io;
+import ballerina/lang.'float;
+import ballerina/log;
 import ballerinax/netsuite;
 import thishani/sfdc;
 
@@ -6,7 +8,7 @@ netsuite:Client nsClient = new(nsConfig);
 sfdc:BaseClient baseClient = new(sfConfig);
 
 listener sfdc:EventListener opportunityUpdateListener = new(opportunityListenerConfig);
-// listener sfdc:EventListener quoteUpdateListener = new(quoteListenerConfig);
+listener sfdc:EventListener quoteUpdateListener = new(quoteListenerConfig);
 
 service workflowOne on opportunityUpdateListener {
     resource function onEvent(json op) {  
@@ -14,12 +16,12 @@ service workflowOne on opportunityUpdateListener {
         io:StringReader sr = new(op.toJsonString());
         json|error opportunity = sr.readJson();
         if (opportunity is json) {
-            io:println("Opportunity Stage : ", opportunity.sobject.StageName);
+            log:printInfo("Opportunity Stage : " + opportunity.sobject.StageName.toString());
             //check if opportunity is closed won
             if (opportunity.sobject.StageName == "Closed Won") {
                 //get the account id from the opportunity
                 string accountId = opportunity.sobject.AccountId.toString();
-                io:println("Account ID : ", accountId);
+                log:printInfo("Account ID : " + accountId);
                 //create sobject client
                 sfdc:SObjectClient sobjectClient = baseClient->getSobjectClient();
                 //get account
@@ -27,11 +29,11 @@ service workflowOne on opportunityUpdateListener {
                 if (account is json) {
                     //extract required fields from the account record
                     string accountName = account.Name.toString();
-                    io:println("Account Name : ", accountName);
+                    log:printInfo("Account Name : " + accountName);
                     //Netsuite logic follows...
-                    error? err = updateNetSuiteCustomer(<@untainted> accountName);
+                    error|() err = updateNetSuiteCustomer(<@untainted> accountName);
                     if (err is error) {
-                        io:println("Failed to update customer account", err);
+                        log:printError("Failed to update customer record in NetSuite", err);
                     }
                 }
             }
@@ -40,28 +42,54 @@ service workflowOne on opportunityUpdateListener {
 }
 
 //TODO uncomment it once the quote-product problem is resolved
-// service workflowTwo on quoteUpdateListener {
-//     resource function onEvent(json qu) {  
-//         //convert json string to json      
-//         io:StringReader sr = new(qu.toJsonString());
-//         json|error quote = sr.readJson();
-//         if (quote is json) {
-//             io:println("Quote Status : ", quote.sobject.Status);
-//             //check if status is approved
-//             if (quote.sobject.Status == "Approved"){
-//                 //extract required fields
-//                 string opportunityId = quote.sobject.OpportunityId.toString();
-//                 io:println("Opportunity ID : ", opportunityId);
+service workflowTwo on quoteUpdateListener {
+    resource function onEvent(json qu) {  
+        //convert json string to json      
+        io:StringReader sr = new(qu.toJsonString());
+        json|error quote = sr.readJson();
+        if (quote is json) {
+            log:printInfo("Quote Status : " + quote.sobject.Status.toString());
+            //check if status is approved
+            if (quote.sobject.Status == "Approved"){
 
-//                 //Netsuite logic follows...
-//                 error? err = generateNetSuiteInvoice(opportunityId);
-//                 if (err is error) {
-//                     io:println("Failed to update customer account", err);
-//                 }
-//             }
-//         }
-//     }
-// }
+                //extract GrandTotal
+                string grandTotal = quote.sobject.GrandTotal.toString();
+                var convertedTotal = 'float:fromString(grandTotal);
+                if convertedTotal is sfdc:Error {
+                    log:printError("Invalid data type" + convertedTotal.message());
+                    return;
+                }
+
+                //extract required fields
+                string opportunityId = quote.sobject.OpportunityId.toString();
+                
+                //create sobject client
+                sfdc:SObjectClient sobjectClient = baseClient->getSobjectClient();
+                
+                //get opportunity
+                json|sfdc:Error opportunity = sobjectClient->getOpportunityById(opportunityId);
+                if (opportunity is json) {
+                    //get the account id from the opportunity
+                    string accountId = opportunity.AccountId.toString();
+                    json|sfdc:Error account = sobjectClient->getAccountById(accountId);
+                    if (account is json) {
+                        //extract required fields from the account record
+                        string accountName = account.Name.toString();
+                        log:printInfo("Account Name : " + accountName);
+
+                        // Netsuite logic follows...
+                        error? err = generateNetSuiteInvoice(<float> convertedTotal, <@untainted> accountName);
+                        if (err is error) {
+                            log:printError("Failed to generate Invoice in NetSuite", err);
+                        }
+                    }
+
+                
+                }
+            }
+        }
+    }
+}
 
 function updateNetSuiteCustomer(string customerId) returns @tainted error? {
 
@@ -70,7 +98,7 @@ function updateNetSuiteCustomer(string customerId) returns @tainted error? {
     // Search for existing customer record under customerId (Step 4).
     [string[], boolean]|netsuite:Error result = nsClient->search(netsuite:Customer, "entityId IS " + customerId);
     if result is netsuite:Error {
-        io:println(result.message());
+        log:printInfo(result.message());
         customer = check createNewCustomer(customerId);
     } else {
         var [idArr, hasMore] = result;
@@ -80,37 +108,52 @@ function updateNetSuiteCustomer(string customerId) returns @tainted error? {
             customer = check createNewCustomer(customerId);
         } else {
             customer = check retriveExistingCustomer(<@untainted> idArr[0]);
-            io:println("Existing customer is retrieved: customer id = " + idArr[0]);
+            log:printInfo("Existing customer is retrieved: customer id = " + idArr[0]);
             // Update the existing customer with the `companyName` (Step 5).
             json cName = { companyName: "ballerinalang" };
             string|netsuite:Error updated = nsClient->update(<@untainted netsuite:Customer> customer, cName);
             if updated is netsuite:Error {
-                io:println(updated.message());
-                return netsuite:Error("Failed to update Customer", updated);
+                log:printInfo(updated.message());
+                return netsuite:Error("Customer Update operation failed", updated);
             }
 
         }
     }
 }
 
-function generateNetSuiteInvoice(string customerId) returns @tainted error? {
+function generateNetSuiteInvoice(float grandTotal, string accountName) returns @tainted error? {
     netsuite:Customer? customer = ();
-    // The quote should contain aleast 1 item. Until the salesforce logic is completed, a random item is used
-    netsuite:NonInventoryItem nonInventoryItem = check getARandomItem();
+
+    // Search for respective customer via accountName.
+    [string[], boolean]|netsuite:Error result = nsClient->search(netsuite:Customer, "entityId IS " + accountName);
+    if result is netsuite:Error {
+        return netsuite:Error("Customer search operation failed", result);
+    } else {
+        var [idArr, hasMore] = result;
+
+        if (idArr.length() == 0) {
+            return netsuite:Error("No such Customer record found");
+        } else {
+            customer = check retriveExistingCustomer(<@untainted> idArr[0]);
+            log:printInfo("Retrieved customer id : " + idArr[0]);
+        }
+    }
+
+    // Assume that the quote is created for serviceItem
+    netsuite:NonInventoryItem nonInventoryItem = check getNonInventoryItem();
 
     netsuite:ItemElement serviceItem = {
-        amount: 39000.0,
+        amount: grandTotal,
         item: nonInventoryItem,
         itemSubType: "Sale",
         itemType: "NonInvtPart"
     };
 
-    // Get the classification(POD), which the invoice belongs to.
+    // Get the Classification(POD), which the invoice belongs to.
     string classANZId = "88"; 
     netsuite:ReadableRecord|netsuite:Error retrieved = nsClient->get(classANZId, netsuite:Classification);
     if retrieved is netsuite:Error {
-        io:println(retrieved.message());
-        return netsuite:Error("Failed to retrieve Classification", retrieved);
+        return netsuite:Error("Classification retrieval failed", retrieved);
     }
     netsuite:Classification class = <netsuite:Classification> retrieved;
 
@@ -127,10 +170,9 @@ function generateNetSuiteInvoice(string customerId) returns @tainted error? {
     // Create the Invoice record in NetSuite.
     string|netsuite:Error created = nsClient->create(<@untainted> invoice);
     if created is netsuite:Error {
-        io:println(created.message());
-        return netsuite:Error("Failed to create Invoice", created);
+        return netsuite:Error("Invoice creation failed", created);
     }
     string id = <string> created;
-    io:println("The invoice has created: id = " + id);
+    log:printInfo("The invoice has created: id = " + id);
     return;
 }
