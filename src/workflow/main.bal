@@ -2,10 +2,12 @@ import ballerina/io;
 import ballerina/lang.'float;
 import ballerina/log;
 import ballerinax/netsuite;
+import ballerinax/slack;
 import thishani/sfdc;
 
 netsuite:Client nsClient = new(nsConfig);
 sfdc:BaseClient baseClient = new(sfConfig);
+slack:Client slackClient = new(slackConfig);
 
 listener sfdc:EventListener opportunityUpdateListener = new(opportunityListenerConfig);
 listener sfdc:EventListener quoteUpdateListener = new(quoteListenerConfig);
@@ -30,7 +32,7 @@ service workflowOne on opportunityUpdateListener {
                     //extract required fields from the account record
                     string accountName = account.Name.toString();
                     log:printInfo("Account Name : " + accountName);
-                    //Netsuite logic follows...
+                    //NetSuite logic follows...
                     error|() err = updateNetSuiteCustomer(<@untainted> accountName);
                     if (err is error) {
                         log:printError("Failed to update customer record in NetSuite", err);
@@ -41,7 +43,6 @@ service workflowOne on opportunityUpdateListener {
     }
 }
 
-//TODO uncomment it once the quote-product problem is resolved
 service workflowTwo on quoteUpdateListener {
     resource function onEvent(json qu) {  
         //convert json string to json      
@@ -53,12 +54,12 @@ service workflowTwo on quoteUpdateListener {
             if (quote.sobject.Status == "Approved"){
 
                 //extract GrandTotal
-                string grandTotal = quote.sobject.GrandTotal.toString();
-                var convertedTotal = 'float:fromString(grandTotal);
-                if convertedTotal is sfdc:Error {
-                    log:printError("Invalid data type" + convertedTotal.message());
+                var grandTotal = 'float:fromString(quote.sobject.GrandTotal.toString());
+                if grandTotal is sfdc:Error {
+                    log:printError("Invalid data type" + grandTotal.message());
                     return;
                 }
+                float invoiceAmount = <float> grandTotal;
 
                 //extract required fields
                 string opportunityId = quote.sobject.OpportunityId.toString();
@@ -77,14 +78,18 @@ service workflowTwo on quoteUpdateListener {
                         string accountName = account.Name.toString();
                         log:printInfo("Account Name : " + accountName);
 
-                        // Netsuite logic follows...
-                        error? err = generateNetSuiteInvoice(<float> convertedTotal, <@untainted> accountName);
+                        // NetSuite logic follows...
+                        error? err = generateNetSuiteInvoice(invoiceAmount, <@untainted> accountName);
                         if (err is error) {
                             log:printError("Failed to generate Invoice in NetSuite", err);
+                            return;
+                        }
+
+                        // Slack notification...
+                        if (invoiceAmount >= 1000000.00) {
+                            sendSlackNotification(invoiceAmount, accountName);
                         }
                     }
-
-                
                 }
             }
         }
@@ -175,4 +180,20 @@ function generateNetSuiteInvoice(float grandTotal, string accountName) returns @
     string id = <string> created;
     log:printInfo("The invoice has created: id = " + id);
     return;
+}
+
+function sendSlackNotification(float invoiceAmount, string accountName) {
+    slack:ChatClient chatClient = slackClient.getChatClient();
+    slack:Message messageParams = {
+        channelName: "announcements",
+        text: "New invoice has been creared for " + invoiceAmount.toString() +
+                " under account : " + accountName
+    };
+
+    string|error response = chatClient->postMessage(messageParams);
+    if (response is string) {
+        log:printInfo("Message posted to channel " + response);
+    } else {
+        log:printError("Failed to sent notification", response);
+    }
 }

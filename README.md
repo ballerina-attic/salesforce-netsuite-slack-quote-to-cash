@@ -111,7 +111,8 @@ insert pushTopic;
 4. Once the creation is done, specify the topic name in each event listener service config.
 
 #### Setup NetSuite configurations
-Create a [NetSuite](https://www.netsuite.com/portal/home.shtml) account and obtain the following parameters:
+Create a [NetSuite](https://www.netsuite.com/portal/home.shtml) account and integration record to obtain the following 
+parameters:
 
 * Client ID
 * Client Secret
@@ -119,11 +120,14 @@ Create a [NetSuite](https://www.netsuite.com/portal/home.shtml) account and obta
 * Refresh Token
 * Refresh Token URL
 
-For more information on obtaining the above parameters, see follow the 
+For more information on obtaining the above parameters, follow the 
 [setup tutorial](https://medium.com/@chamilelle/setup-rest-web-service-and-oauth-2-0-in-your-netsuite-account-c4243240bc3f).
 
 #### Setup Slack configurations
-//TODO
+Create a new [Slack](https://api.slack.com/apps?new_granular_bot_app=1) app and obtain the access token. For more 
+information on obtaining the token, follow the 
+[documentation](https://github.com/ballerina-platform/module-ballerinax-slack/blob/master/src/slack/Module.md). 
+Make sure you set `chat:write` and `channel:read` as scopes in your app. 
 
 Once you obtained all configurations, Replace "" in the `ballerina.conf` file with your data.
 
@@ -143,6 +147,8 @@ NS_REFRESH_URL="https://<instance-id>.suitetalk.api.netsuite.com/services/rest/a
 NS_REFRESH_TOKEN="<REFRESH_TOKEN>"
 NS_CLIENT_ID="<CLIENT_ID>"
 NS_CLIENT_SECRET="<CLIENT_SECRET>"
+
+SLACK_ACCESS_TOKEN="<ACCESS_TOKEN>"
 
 BEARER_TOKEN="<BEARER_TOKEN>"
 OPPORTUNITY_UPDATE_TOPIC="/topic/OpportunityUpdate"
@@ -185,6 +191,8 @@ following output.
 2020-06-25 19:54:40,178 INFO  [chamil/workflow] - The invoice has created: id = 519194 
 ```
 
-If the quote exceeds the expected threshould, the slack notification will be sent.
+If the quote exceeds the expected threshold, the slack notification will be sent with the following output.
 
-//TODO : Add output
+```
+2020-06-25 19:55:40,178 INFO  [chamil/workflow] - Message posted to channel 1594193873.002600 
+```

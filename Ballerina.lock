@@ -163,6 +163,11 @@ org_name = "ballerina"
 name = "java"
 version = "0.9.0"
 
+[[imports."ballerina/encoding:1.0.0"]]
+org_name = "ballerina"
+name = "java"
+version = "0.9.0"
+
 [[imports."ballerina/auth:1.0.0"]]
 org_name = "ballerina"
 name = "log"
@@ -232,6 +237,31 @@ version = "1.0.0"
 org_name = "ballerina"
 name = "java"
 version = "0.9.0"
+
+[[imports."ballerinax/slack:0.9.1"]]
+org_name = "ballerina"
+name = "http"
+version = "1.0.0"
+
+[[imports."ballerinax/slack:0.9.1"]]
+org_name = "ballerina"
+name = "oauth2"
+version = "1.0.0"
+
+[[imports."ballerinax/slack:0.9.1"]]
+org_name = "ballerina"
+name = "encoding"
+version = "1.0.0"
+
+[[imports."ballerinax/slack:0.9.1"]]
+org_name = "ballerina"
+name = "mime"
+version = "1.0.0"
+
+[[imports."ballerinax/slack:0.9.1"]]
+org_name = "ballerina"
+name = "stringutils"
+version = "0.5.0"
 
 [[imports."ballerina/oauth2:1.0.0"]]
 org_name = "ballerina"
@@ -304,6 +334,11 @@ name = "netsuite"
 version = "0.9.1"
 
 [[imports."chamil/workflow:0.1.0"]]
+org_name = "ballerinax"
+name = "slack"
+version = "0.9.1"
+
+[[imports."chamil/workflow:0.1.0"]]
 org_name = "thishani"
 name = "sfdc"
 version = "0.1.0"
@@ -312,6 +347,16 @@ version = "0.1.0"
 org_name = "ballerina"
 name = "io"
 version = "0.5.0"
+
+[[imports."chamil/workflow:0.1.0"]]
+org_name = "ballerina"
+name = "lang.float"
+version = "1.0.0"
+
+[[imports."chamil/workflow:0.1.0"]]
+org_name = "ballerina"
+name = "log"
+version = "1.0.0"
 
 [[imports."ballerina/stringutils:0.5.0"]]
 org_name = "ballerina"

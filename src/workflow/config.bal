@@ -1,5 +1,6 @@
 import ballerina/config;
 import ballerinax/netsuite;
+import ballerinax/slack;
 import thishani/sfdc;
 
 netsuite:Configuration nsConfig = {
@@ -38,4 +39,10 @@ sfdc:ListenerConfiguration quoteListenerConfig = {
     apiUrl: config:getAsString("SF_EP_URL"),
     token: config:getAsString("BEARER_TOKEN"),
     topic: config:getAsString("QUOTE_UPDATE_TOPIC")
+};
+
+slack:Configuration slackConfig = {
+    oauth2Config: {
+        accessToken: config:getAsString("SLACK_ACCESS_TOKEN")
+    }
 };
