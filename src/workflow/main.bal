@@ -3,16 +3,18 @@ import ballerina/lang.'float;
 import ballerina/log;
 import ballerinax/netsuite;
 import ballerinax/slack;
-import thishani/sfdc;
+import ballerinax/sfdc;
 
 netsuite:Client nsClient = new(nsConfig);
 sfdc:BaseClient baseClient = new(sfConfig);
 slack:Client slackClient = new(slackConfig);
 
-listener sfdc:EventListener opportunityUpdateListener = new(opportunityListenerConfig);
-listener sfdc:EventListener quoteUpdateListener = new(quoteListenerConfig);
+listener sfdc:Listener eventListener = new (listenerConfig);
 
-service workflowOne on opportunityUpdateListener {
+@sfdc:ServiceConfig {
+    topic:"/topic/OpportunityUpdate"
+}
+service workflowOne on eventListener {
     resource function onEvent(json op) {  
         //convert json string to json
         io:StringReader sr = new(op.toJsonString());
@@ -43,7 +45,10 @@ service workflowOne on opportunityUpdateListener {
     }
 }
 
-service workflowTwo on quoteUpdateListener {
+@sfdc:ServiceConfig {
+    topic:"/topic/QuoteUpdate"
+}
+service workflowTwo on eventListener {
     resource function onEvent(json qu) {  
         //convert json string to json      
         io:StringReader sr = new(qu.toJsonString());
