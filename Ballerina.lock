@@ -1,4 +1,4 @@
-org_name = "chamil"
+org_name = "ballerinaguides"
 version = "0.1.0"
 lockfile_version = "1.0.0"
 ballerina_version = "slp1"
@@ -323,37 +323,37 @@ org_name = "ballerina"
 name = "java"
 version = "0.9.0"
 
-[[imports."chamil/workflow:0.1.0"]]
+[[imports."ballerinaguides/workflow:0.1.0"]]
 org_name = "ballerina"
 name = "config"
 version = "1.0.0"
 
-[[imports."chamil/workflow:0.1.0"]]
+[[imports."ballerinaguides/workflow:0.1.0"]]
 org_name = "ballerinax"
 name = "netsuite"
 version = "0.9.1"
 
-[[imports."chamil/workflow:0.1.0"]]
+[[imports."ballerinaguides/workflow:0.1.0"]]
 org_name = "ballerinax"
 name = "slack"
 version = "0.9.1"
 
-[[imports."chamil/workflow:0.1.0"]]
+[[imports."ballerinaguides/workflow:0.1.0"]]
 org_name = "thishani"
 name = "sfdc"
 version = "0.1.0"
 
-[[imports."chamil/workflow:0.1.0"]]
+[[imports."ballerinaguides/workflow:0.1.0"]]
 org_name = "ballerina"
 name = "io"
 version = "0.5.0"
 
-[[imports."chamil/workflow:0.1.0"]]
+[[imports."ballerinaguides/workflow:0.1.0"]]
 org_name = "ballerina"
 name = "lang.float"
 version = "1.0.0"
 
-[[imports."chamil/workflow:0.1.0"]]
+[[imports."ballerinaguides/workflow:0.1.0"]]
 org_name = "ballerina"
 name = "log"
 version = "1.0.0"

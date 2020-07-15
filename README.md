@@ -186,14 +186,14 @@ To execute the second workflow, quote update event should be triggered. So go to
 The change the stage to approved state. As soon as you change the stage, quote event listener will get triggered with 
 following output.
 ```
-2020-06-25 19:54:31,153 INFO  [chamil/workflow] - Quote Status : Approved 
-2020-06-25 19:54:31,539 INFO  [chamil/workflow] - Account Name : TestWorkFlow 
-2020-06-25 19:54:32,765 INFO  [chamil/workflow] - Retrieved customer id : 41537 
-2020-06-25 19:54:40,178 INFO  [chamil/workflow] - The invoice has created: id = 519194 
+2020-06-25 19:54:31,153 INFO  [ballerinaguides/workflow] - Quote Status : Approved 
+2020-06-25 19:54:31,539 INFO  [ballerinaguides/workflow] - Account Name : TestWorkFlow 
+2020-06-25 19:54:32,765 INFO  [ballerinaguides/workflow] - Retrieved customer id : 41537 
+2020-06-25 19:54:40,178 INFO  [ballerinaguides/workflow] - The invoice has created: id = 519194 
 ```
 
 If the quote exceeds the expected threshold, the slack notification will be sent with the following output.
 
 ```
-2020-06-25 19:55:40,178 INFO  [chamil/workflow] - Message posted to channel 1594193873.002600 
+2020-06-25 19:55:40,178 INFO  [ballerinaguides/workflow] - Message posted to channel 1594193873.002600 
 ```
