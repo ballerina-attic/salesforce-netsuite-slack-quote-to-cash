@@ -80,7 +80,9 @@ For more information on obtaining OAuth2 credentials, visit
 or follow the 
 [Setup tutorial](https://medium.com/@bpmmendis94/obtain-access-refresh-tokens-from-salesforce-rest-api-a324fe4ccd9b).
 
-//TODO : How to get bearer token
+Also, keep a note of your Salesforce username, password and the security token that will be needed for initializing the listener. 
+
+For more information on the secret token, please visit [Reset Your Security Token](https://help.salesforce.com/articleView?id=user_security_token.htm&type=5).
 
 #### Create push topic in Salesforce developer console
 
@@ -141,6 +143,9 @@ SF_CLIENT_SECRET="<CLIENT_SECRET>"
 SF_REFRESH_TOKEN="<REFRESH_TOKEN>"
 SF_REFRESH_URL="https://login.salesforce.com/services/oauth2/token"
 
+SF_USERNAME="<SF_USERNAME>"
+SF_PASSWORD="<SF_PASSWORD + SECURITY_TOKEN>"
+
 NS_BASE_URL="https://<instance-id>.suitetalk.api.netsuite.com"
 NS_ACCESS_TOKEN="<ACCESS_TOKEN>"
 NS_REFRESH_URL="https://<instance-id>.suitetalk.api.netsuite.com/services/rest/auth/oauth2/v1/token"
@@ -149,10 +154,6 @@ NS_CLIENT_ID="<CLIENT_ID>"
 NS_CLIENT_SECRET="<CLIENT_SECRET>"
 
 SLACK_ACCESS_TOKEN="<ACCESS_TOKEN>"
-
-BEARER_TOKEN="<BEARER_TOKEN>"
-OPPORTUNITY_UPDATE_TOPIC="/topic/OpportunityUpdate"
-QUOTE_UPDATE_TOPIC="/topic/QuoteUpdate"
 ```
 
 

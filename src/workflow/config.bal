@@ -1,7 +1,7 @@
 import ballerina/config;
 import ballerinax/netsuite;
 import ballerinax/slack;
-import thishani/sfdc;
+import ballerinax/sfdc;
 
 netsuite:Configuration nsConfig = {
     baseUrl: config:getAsString("NS_BASE_URL"),
@@ -29,16 +29,9 @@ sfdc:SalesforceConfiguration sfConfig = {
     }
 };
 
-sfdc:ListenerConfiguration opportunityListenerConfig = {
-    apiUrl: config:getAsString("SF_EP_URL"),
-    token: config:getAsString("BEARER_TOKEN"),
-    topic: config:getAsString("OPPORTUNITY_UPDATE_TOPIC")
-};
-
-sfdc:ListenerConfiguration quoteListenerConfig = {
-    apiUrl: config:getAsString("SF_EP_URL"),
-    token: config:getAsString("BEARER_TOKEN"),
-    topic: config:getAsString("QUOTE_UPDATE_TOPIC")
+sfdc:ListenerConfiguration listenerConfig = {
+    username: config:getAsString("SF_USERNAME"),
+    password: config:getAsString("SF_PASSWORD")
 };
 
 slack:Configuration slackConfig = {
